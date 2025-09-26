@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { Tabs } from "expo-router";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import "../global.css";
 
 // Only configure notifications if not in Expo Go
 const isExpoGo = Constants.appOwnership === 'expo';
