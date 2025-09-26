@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
-import { ScrollView, Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useHabits } from './hooks/useHabits';
 
 export default function TodayScreen() {
