@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import HabitListItem from '../components/HabitListItem';
 import { useHabits } from '../contexts/HabitsContext';
 
 export default function HabitsScreen() {
@@ -35,47 +36,7 @@ export default function HabitsScreen() {
           </View>
         ) : (
           habits.map(habit => (
-            <Link
-              key={habit.id}
-              href={{
-                pathname: "/habits/[id]",
-                params: { id: habit.id }
-              }}
-              asChild
-            >
-              <TouchableOpacity className="bg-surface rounded-xl p-4 mb-4">
-                <View className="flex-row items-center mb-2">
-                  <View
-                    className="w-10 h-10 rounded-full mr-3 items-center justify-center"
-                    style={{ backgroundColor: habit.color + '20' }}
-                  >
-                    <View
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: habit.color }}
-                    />
-                  </View>
-                  <Text className="text-lg font-medium text-gray-800 flex-1">
-                    {habit.name}
-                  </Text>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={20}
-                    color="#6B7280"
-                  />
-                </View>
-                
-                <View className="flex-row items-center mt-2">
-                  <View className="flex-1">
-                    <Text className="text-secondary">
-                      {habit.currentStreak} day streak
-                    </Text>
-                  </View>
-                  <Text className="text-secondary">
-                    {Math.round(habit.completionRate)}% complete
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </Link>
+            <HabitListItem key={habit.id} habit={habit} showStreak={true} />
           ))
         )}
       </ScrollView>

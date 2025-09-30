@@ -42,7 +42,9 @@ export default function StatsScreen() {
 
   return (
     <ScrollView className="flex-1 bg-background p-4">
-      <Text className="text-2xl font-bold text-gray-800 mb-6">Statistics</Text>
+      <View className="flex-row justify-between items-center mb-6">
+        <Text className="text-2xl font-bold text-gray-800">Statistics</Text>
+      </View>
 
       <View className="bg-surface rounded-xl p-4 mb-6">
         <Text className="text-lg font-medium text-gray-800 mb-4">
