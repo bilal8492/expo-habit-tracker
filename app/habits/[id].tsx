@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useHabits } from '../hooks/useHabits';
+import { useHabits } from '../contexts/HabitsContext';
 
 export default function HabitDetailsScreen() {
   const { id } = useLocalSearchParams();

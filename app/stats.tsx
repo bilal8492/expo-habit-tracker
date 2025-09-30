@@ -1,12 +1,12 @@
 import { eachDayOfInterval, format, subDays } from 'date-fns';
 import { Dimensions, ScrollView, Text, View } from 'react-native';
+import { useHabits } from './contexts/HabitsContext';
 // import {
 //     VictoryAxis,
 //     VictoryBar,
 //     VictoryChart,
 //     VictoryTheme
 // } from 'victory-native';
-import { useHabits } from './hooks/useHabits';
 
 const screenWidth = Dimensions.get('window').width;
 

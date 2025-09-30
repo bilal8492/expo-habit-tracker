@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useHabits } from '../hooks/useHabits';
+import { useHabits } from '../contexts/HabitsContext';
 
 export default function HabitsScreen() {
   const { habits, loading } = useHabits();

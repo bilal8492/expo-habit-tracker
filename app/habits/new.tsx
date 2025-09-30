@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useHabits } from '../hooks/useHabits';
+import { useHabits } from '../contexts/HabitsContext';
 
 const COLORS = [
   '#10B981', // Emerald
@@ -16,7 +16,7 @@ const COLORS = [
 
 export default function NewHabitScreen() {
   const router = useRouter();
-  const { addHabit } = useHabits();
+  const { addHabit, refreshHabits } = useHabits();
   const [name, setName] = useState('');
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -24,12 +24,21 @@ export default function NewHabitScreen() {
 
   const handleCreate = async () => {
     if (name.trim()) {
-      await addHabit({
-        name: name.trim(),
-        color: selectedColor,
-        reminderTime: reminderTime || undefined,
-      });
-      router.back();
+      try {
+        const newHabit = await addHabit({
+          name: name.trim(),
+          color: selectedColor,
+          reminderTime: reminderTime || undefined,
+        });
+        
+        if (newHabit) {
+          // Make sure changes are saved before navigating back
+          await refreshHabits();
+          router.back();
+        }
+      } catch (error) {
+        console.error('Error creating habit:', error);
+      }
     }
   };
 

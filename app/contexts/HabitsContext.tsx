@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
-import { useCallback, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
-// Disable notifications in Expo Go as they're not supported in SDK 53
+const HABITS_STORAGE_KEY = '@habits';
 const isExpoGo = Constants.appOwnership === 'expo';
 
 interface Habit {
@@ -15,13 +15,23 @@ interface Habit {
   streaks: { [date: string]: boolean };
 }
 
-export interface HabitWithStats extends Habit {
+interface HabitWithStats extends Habit {
   currentStreak: number;
   longestStreak: number;
   completionRate: number;
 }
 
-const HABITS_STORAGE_KEY = '@habits';
+interface HabitsContextType {
+  habits: HabitWithStats[];
+  loading: boolean;
+  addHabit: (habit: Omit<Habit, 'id' | 'createdAt' | 'streaks'>) => Promise<Habit>;
+  updateHabit: (habitId: string, updates: Partial<Habit>) => Promise<void>;
+  deleteHabit: (habitId: string) => Promise<void>;
+  toggleHabitForDate: (habitId: string, date: string) => Promise<void>;
+  refreshHabits: () => Promise<void>;
+}
+
+const HabitsContext = createContext<HabitsContextType | undefined>(undefined);
 
 // Helper functions
 const scheduleNotification = async (habit: Habit) => {
@@ -31,10 +41,8 @@ const scheduleNotification = async (habit: Habit) => {
     const [hours, minutes] = habit.reminderTime.split(':').map(Number);
     const identifier = `habit-${habit.id}`;
 
-    // Cancel any existing notification for this habit
     await Notifications.cancelScheduledNotificationAsync(identifier);
 
-    // Schedule new notification
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Habit Reminder',
@@ -61,13 +69,9 @@ const cancelNotification = async (habitId: string) => {
   }
 };
 
-export const useHabits = () => {
+export function HabitsProvider({ children }: { children: React.ReactNode }) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadHabits();
-  }, []);
 
   const loadHabits = async () => {
     try {
@@ -82,7 +86,10 @@ export const useHabits = () => {
     }
   };
 
-  // Force refresh habits from storage
+  useEffect(() => {
+    loadHabits();
+  }, []);
+
   const refreshHabits = useCallback(async () => {
     await loadHabits();
   }, []);
@@ -93,6 +100,7 @@ export const useHabits = () => {
       setHabits(newHabits);
     } catch (error) {
       console.error('Error saving habits:', error);
+      throw error;
     }
   };
 
@@ -104,57 +112,76 @@ export const useHabits = () => {
       streaks: {},
     };
 
-    if (habit.reminderTime) {
-      await scheduleNotification(newHabit);
-    }
+    try {
+      if (habit.reminderTime) {
+        await scheduleNotification(newHabit);
+      }
 
-    const newHabits = [...habits, newHabit];
-    await AsyncStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify(newHabits));
-    setHabits(newHabits); // Directly update the state
-    return newHabit; // Return the new habit
+      const newHabits = [...habits, newHabit];
+      await saveHabits(newHabits);
+      return newHabit;
+    } catch (error) {
+      console.error('Error adding habit:', error);
+      throw error;
+    }
   }, [habits]);
 
   const toggleHabitForDate = useCallback(async (habitId: string, date: string) => {
-    const newHabits = habits.map(habit => {
-      if (habit.id === habitId) {
-        return {
-          ...habit,
-          streaks: {
-            ...habit.streaks,
-            [date]: !habit.streaks[date],
-          },
-        };
-      }
-      return habit;
-    });
-    await saveHabits(newHabits);
+    try {
+      const newHabits = habits.map(habit => {
+        if (habit.id === habitId) {
+          return {
+            ...habit,
+            streaks: {
+              ...habit.streaks,
+              [date]: !habit.streaks[date],
+            },
+          };
+        }
+        return habit;
+      });
+      await saveHabits(newHabits);
+    } catch (error) {
+      console.error('Error toggling habit:', error);
+      throw error;
+    }
   }, [habits]);
 
   const deleteHabit = useCallback(async (habitId: string) => {
-    const habit = habits.find(h => h.id === habitId);
-    if (habit?.reminderTime) {
-      await cancelNotification(habitId);
+    try {
+      const habit = habits.find(h => h.id === habitId);
+      if (habit?.reminderTime) {
+        await cancelNotification(habitId);
+      }
+      const newHabits = habits.filter(h => h.id !== habitId);
+      await saveHabits(newHabits);
+    } catch (error) {
+      console.error('Error deleting habit:', error);
+      throw error;
     }
-    const newHabits = habits.filter(h => h.id !== habitId);
-    await saveHabits(newHabits);
   }, [habits]);
 
   const updateHabit = useCallback(async (habitId: string, updates: Partial<Habit>) => {
-    const newHabits = habits.map(habit => {
-      if (habit.id === habitId) {
-        const updatedHabit = { ...habit, ...updates };
-        if (updates.reminderTime !== undefined) {
-          if (updates.reminderTime) {
-            scheduleNotification(updatedHabit);
-          } else {
-            cancelNotification(habitId);
+    try {
+      const newHabits = habits.map(habit => {
+        if (habit.id === habitId) {
+          const updatedHabit = { ...habit, ...updates };
+          if (updates.reminderTime !== undefined) {
+            if (updates.reminderTime) {
+              scheduleNotification(updatedHabit);
+            } else {
+              cancelNotification(habitId);
+            }
           }
+          return updatedHabit;
         }
-        return updatedHabit;
-      }
-      return habit;
-    });
-    await saveHabits(newHabits);
+        return habit;
+      });
+      await saveHabits(newHabits);
+    } catch (error) {
+      console.error('Error updating habit:', error);
+      throw error;
+    }
   }, [habits]);
 
   const getHabitWithStats = useCallback((habit: Habit): HabitWithStats => {
@@ -192,10 +219,8 @@ export const useHabits = () => {
     };
   }, []);
 
-  const habitsWithStats = habits.map(getHabitWithStats);
-
-  return {
-    habits: habitsWithStats,
+  const value = {
+    habits: habits.map(getHabitWithStats),
     loading,
     addHabit,
     updateHabit,
@@ -203,4 +228,14 @@ export const useHabits = () => {
     toggleHabitForDate,
     refreshHabits,
   };
+
+  return <HabitsContext.Provider value={value}>{children}</HabitsContext.Provider>;
+}
+
+export const useHabits = () => {
+  const context = useContext(HabitsContext);
+  if (context === undefined) {
+    throw new Error('useHabits must be used within a HabitsProvider');
+  }
+  return context;
 };

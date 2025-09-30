@@ -1,11 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { useEffect } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useHabits } from './hooks/useHabits';
+import { useHabits } from './contexts/HabitsContext';
 
 export default function TodayScreen() {
-  const { habits, loading, toggleHabitForDate } = useHabits();
+  const { habits, loading, toggleHabitForDate, refreshHabits } = useHabits();
   const today = format(new Date(), 'yyyy-MM-dd');
+
+  useEffect(() => {
+    refreshHabits();
+  }, []);
 
   if (loading) {
     return (
