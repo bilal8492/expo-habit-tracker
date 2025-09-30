@@ -2,10 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { useEffect } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useHabits } from './contexts/HabitsContext';
+import { useHabits } from '../contexts/HabitsContext';
+import { useAppTheme } from './theme/ThemeContext';
 
 export default function TodayScreen() {
   const { habits, loading, toggleHabitForDate, refreshHabits } = useHabits();
+  const { theme } = useAppTheme();
   const today = format(new Date(), 'yyyy-MM-dd');
 
   useEffect(() => {
@@ -14,25 +16,29 @@ export default function TodayScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <Text className="text-secondary text-lg">Loading...</Text>
+      <View className="flex-1 items-center justify-center" style={{ backgroundColor: theme.background }}>
+        <Text className="text-lg" style={{ color: theme.text.secondary }}>
+          Loading...
+        </Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-background p-4">
-      <Text className="text-2xl font-bold text-gray-800 mb-2">
+    <ScrollView className="flex-1 p-4" style={{ backgroundColor: theme.background }}>
+      <Text className="text-2xl font-bold mb-2" style={{ color: theme.text.primary }}>
         Today's Habits
       </Text>
-      <Text className="text-secondary mb-6">
+      <Text className="text-base mb-6" style={{ color: theme.text.secondary }}>
         {format(new Date(), 'EEEE, MMMM d')}
       </Text>
 
       {habits.length === 0 ? (
         <View className="items-center justify-center py-8">
-          <Text className="text-secondary text-lg mb-2">No habits yet</Text>
-          <Text className="text-secondary text-base">
+          <Text className="text-lg mb-2" style={{ color: theme.text.secondary }}>
+            No habits yet
+          </Text>
+          <Text className="text-base" style={{ color: theme.text.secondary }}>
             Add some habits to get started
           </Text>
         </View>
@@ -40,7 +46,8 @@ export default function TodayScreen() {
         habits.map(habit => (
           <TouchableOpacity
             key={habit.id}
-            className="bg-surface rounded-xl p-4 mb-4 flex-row items-center"
+            className="rounded-xl p-4 mb-4 flex-row items-center"
+            style={{ backgroundColor: theme.surface }}
             onPress={() => toggleHabitForDate(habit.id, today)}
           >
             <View
@@ -57,10 +64,14 @@ export default function TodayScreen() {
               )}
             </View>
             <View className="flex-1">
-              <Text className="text-gray-800 text-lg font-medium">
+              <Text className="text-base font-medium" style={{ color: theme.text.primary,
+                fontSize: 18,
+                fontWeight: '500',
+                marginBottom: 4
+              }}>
                 {habit.name}
               </Text>
-              <Text className="text-secondary">
+              <Text style={{ color: theme.text.secondary }}>
                 {habit.currentStreak} day streak
               </Text>
             </View>

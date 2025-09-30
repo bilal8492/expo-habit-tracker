@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useHabits } from '../contexts/HabitsContext';
+import { useHabits } from '../../contexts/HabitsContext';
 
 const COLORS = [
   '#10B981', // Emerald

@@ -4,7 +4,8 @@ import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useHabits } from '../contexts/HabitsContext';
+import { useHabits } from '../../contexts/HabitsContext';
+import { useAppTheme } from '../theme/ThemeContext';
 
 const COLORS = [
   '#10B981', // Emerald
@@ -19,6 +20,7 @@ export default function EditHabitScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { habits, updateHabit, deleteHabit } = useHabits();
+  const { theme } = useAppTheme();
   const habit = habits.find(h => h.id === id);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -81,14 +83,18 @@ export default function EditHabitScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1" style={{ backgroundColor: theme.background }}>
       <View className="p-4">
         <View className="flex-row justify-between items-center mb-6">
           {isEditing ? (
-            <Text className="text-2xl font-bold text-gray-800">Edit Habit</Text>
+            <Text className="text-2xl font-bold" style={{ color: theme.text.primary }}>
+              Edit Habit
+            </Text>
           ) : (
             <>
-              <Text className="text-2xl font-bold text-gray-800">{habit.name}</Text>
+              <Text className="text-2xl font-bold" style={{ color: theme.text.primary }}>
+                {habit.name}
+              </Text>
               <View className="flex-row">
                 <TouchableOpacity
                   className="p-2 rounded-full mr-2"
@@ -110,35 +116,53 @@ export default function EditHabitScreen() {
         </View>
 
         {isEditing ? (
-          <View className="bg-surface rounded-xl p-4 mb-6">
-            <Text className="text-base font-medium text-gray-800 mb-2">Name</Text>
+          <View className="rounded-xl p-4 mb-6" style={{ backgroundColor: theme.surface }}>
+            <Text className="text-base font-medium mb-2" style={{ color: theme.text.primary }}>
+              Name
+            </Text>
             <TextInput
-              className="bg-white border border-gray-200 rounded-lg px-4 py-3 mb-4"
+              className="rounded-lg px-4 py-3 mb-4 border"
+              style={{ 
+                backgroundColor: theme.background,
+                borderColor: theme.border,
+                color: theme.text.primary
+              }}
               placeholder="Enter habit name"
+              placeholderTextColor={theme.text.secondary}
               value={name}
               onChangeText={setName}
             />
 
-            <Text className="text-base font-medium text-gray-800 mb-2">Color</Text>
+            <Text className="text-base font-medium mb-2" style={{ color: theme.text.primary }}>
+              Color
+            </Text>
             <View className="flex-row flex-wrap gap-2 mb-4">
               {COLORS.map(color => (
                 <TouchableOpacity
                   key={color}
-                  className={`w-10 h-10 rounded-full ${
-                    color === selectedColor ? 'border-2 border-gray-800' : ''
-                  }`}
-                  style={{ backgroundColor: color }}
+                  className="w-10 h-10 rounded-full"
+                  style={{ 
+                    backgroundColor: color,
+                    borderWidth: color === selectedColor ? 2 : 0,
+                    borderColor: theme.text.primary
+                  }}
                   onPress={() => setSelectedColor(color)}
                 />
               ))}
             </View>
 
-            <Text className="text-base font-medium text-gray-800 mb-2">Reminder</Text>
+            <Text className="text-base font-medium mb-2" style={{ color: theme.text.primary }}>
+              Reminder
+            </Text>
             <TouchableOpacity
-              className="bg-white border border-gray-200 rounded-lg px-4 py-3 mb-4"
+              className="rounded-lg px-4 py-3 mb-4 border"
+              style={{ 
+                backgroundColor: theme.background,
+                borderColor: theme.border
+              }}
               onPress={() => setShowTimePicker(true)}
             >
-              <Text className="text-gray-800">
+              <Text style={{ color: theme.text.primary }}>
                 {reminderTime || 'Set reminder time'}
               </Text>
             </TouchableOpacity>
@@ -154,39 +178,39 @@ export default function EditHabitScreen() {
 
             <View className="flex-row gap-2">
               <TouchableOpacity
-                className="flex-1 bg-gray-200 py-3 rounded-lg"
+                className="flex-1 py-3 rounded-lg"
+                style={{ backgroundColor: theme.border }}
                 onPress={() => setIsEditing(false)}
               >
-                <Text className="text-gray-800 text-center font-medium">
+                <Text className="text-center font-medium" style={{ color: theme.text.primary }}>
                   Cancel
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="flex-1 bg-primary py-3 rounded-lg"
+                className="flex-1 py-3 rounded-lg"
+                style={{ backgroundColor: theme.primary }}
                 onPress={handleUpdate}
               >
-                <Text className="text-white text-center font-medium">
+                <Text className="text-center font-medium text-white">
                   Save Changes
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
         ) : (
-          <View className="bg-surface rounded-xl p-4 mb-6">
+          <View className="rounded-xl p-4 mb-6" style={{ backgroundColor: theme.surface }}>
             <View className="flex-row items-center mb-4">
-              <View
-                className="w-10 h-10 rounded-full mr-3 items-center justify-center"
-                style={{ backgroundColor: habit.color + '20' }}
-              >
-                <View
-                  className="w-6 h-6 rounded-full"
-                  style={{ backgroundColor: habit.color }}
-                />
+              <View className="w-10 h-10 rounded-full mr-3 items-center justify-center" 
+                style={{ backgroundColor: habit.color + '20' }}>
+                <View className="w-6 h-6 rounded-full" 
+                  style={{ backgroundColor: habit.color }} />
               </View>
               <View>
-                <Text className="text-lg font-semibold text-gray-800">{habit.name}</Text>
+                <Text className="text-lg font-semibold mb-1" style={{ color: theme.text.primary }}>
+                  {habit.name}
+                </Text>
                 {habit.reminderTime && (
-                  <Text className="text-secondary">
+                  <Text style={{ color: theme.text.secondary }}>
                     Reminder at {habit.reminderTime}
                   </Text>
                 )}
@@ -196,23 +220,30 @@ export default function EditHabitScreen() {
             <View className="mt-4">
               <View className="flex-row justify-between mb-4">
                 <View>
-                  <Text className="text-secondary mb-1">Current Streak</Text>
-                  <Text className="text-2xl font-bold text-gray-800">
+                  <Text className="mb-1" style={{ color: theme.text.secondary }}>
+                    Current Streak
+                  </Text>
+                  <Text className="text-2xl font-bold" style={{ color: theme.text.primary }}>
                     {habit.currentStreak} days
                   </Text>
                 </View>
                 <View>
-                  <Text className="text-secondary mb-1">Longest Streak</Text>
-                  <Text className="text-2xl font-bold text-gray-800">
+                  <Text className="mb-1" style={{ color: theme.text.secondary }}>
+                    Longest Streak
+                  </Text>
+                  <Text className="text-2xl font-bold" style={{ color: theme.text.primary }}>
                     {habit.longestStreak} days
                   </Text>
                 </View>
               </View>
 
               <View>
-                <Text className="text-secondary mb-1">Completion Rate</Text>
+                <Text className="mb-1" style={{ color: theme.text.secondary }}>
+                  Completion Rate
+                </Text>
                 <View className="flex-row items-center">
-                  <View className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden mr-3">
+                  <View className="flex-1 h-2 rounded-full overflow-hidden mr-3" 
+                    style={{ backgroundColor: theme.border }}>
                     <View
                       className="h-full"
                       style={{
@@ -221,7 +252,7 @@ export default function EditHabitScreen() {
                       }}
                     />
                   </View>
-                  <Text className="text-gray-800 font-medium">
+                  <Text className="font-medium" style={{ color: theme.text.primary }}>
                     {Math.round(habit.completionRate)}%
                   </Text>
                 </View>

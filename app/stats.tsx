@@ -1,6 +1,7 @@
 import { eachDayOfInterval, format, subDays } from 'date-fns';
 import { Dimensions, ScrollView, Text, View } from 'react-native';
-import { useHabits } from './contexts/HabitsContext';
+import { useHabits } from '../contexts/HabitsContext';
+import { useAppTheme } from './theme/ThemeContext';
 // import {
 //     VictoryAxis,
 //     VictoryBar,
@@ -12,11 +13,14 @@ const screenWidth = Dimensions.get('window').width;
 
 export default function StatsScreen() {
   const { habits, loading } = useHabits();
+  const { theme } = useAppTheme();
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <Text className="text-secondary text-lg">Loading...</Text>
+      <View className="flex-1 items-center justify-center" style={{ backgroundColor: theme.background }}>
+        <Text className="text-lg" style={{ color: theme.text.secondary }}>
+          Loading...
+        </Text>
       </View>
     );
   }
@@ -41,13 +45,15 @@ export default function StatsScreen() {
   });
 
   return (
-    <ScrollView className="flex-1 bg-background p-4">
+    <ScrollView className="flex-1 p-4" style={{ backgroundColor: theme.background }}>
       <View className="flex-row justify-between items-center mb-6">
-        <Text className="text-2xl font-bold text-gray-800">Statistics</Text>
+        <Text className="text-2xl font-bold" style={{ color: theme.text.primary }}>
+          Statistics
+        </Text>
       </View>
 
-      <View className="bg-surface rounded-xl p-4 mb-6">
-        <Text className="text-lg font-medium text-gray-800 mb-4">
+      <View className="rounded-xl p-4 mb-6" style={{ backgroundColor: theme.surface }}>
+        <Text className="text-lg font-medium mb-4" style={{ color: theme.text.primary }}>
           Last 7 Days
         </Text>
         {/* <VictoryChart
@@ -85,23 +91,23 @@ export default function StatsScreen() {
         </VictoryChart> */}
       </View>
 
-      <View className="bg-surface rounded-xl p-4">
-        <Text className="text-lg font-medium text-gray-800 mb-4">
+      <View className="rounded-xl p-4" style={{ backgroundColor: theme.surface }}>
+        <Text className="text-lg font-medium mb-4" style={{ color: theme.text.primary }}>
           Habit Summary
         </Text>
         {habits.map(habit => (
-          <View key={habit.id} className="mb-4 last:mb-0">
+          <View key={habit.id} className={`${habits.indexOf(habit) === habits.length - 1 ? '' : 'mb-4'}`}>
             <View className="flex-row justify-between items-center mb-1">
-              <Text className="text-base font-medium text-gray-800">
+              <Text className="text-base font-medium" style={{ color: theme.text.primary }}>
                 {habit.name}
               </Text>
-              <Text className="text-secondary">
+              <Text style={{ color: theme.text.secondary }}>
                 {Math.round(habit.completionRate)}% complete
               </Text>
             </View>
-            <View className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <View className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: theme.border }}>
               <View
-                className="h-full bg-primary"
+                className="h-full"
                 style={{
                   width: `${habit.completionRate}%`,
                   backgroundColor: habit.color,

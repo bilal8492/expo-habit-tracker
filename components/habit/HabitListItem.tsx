@@ -2,8 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { Alert, Platform, Text, TouchableOpacity, View } from "react-native";
-import { useHabits } from "../contexts/HabitsContext";
-import { HabitWithStats } from "../types/habit";
+import { useAppTheme } from "../../app/theme/ThemeContext";
+import { HabitWithStats } from "../../app/types/habit";
+import { useHabits } from "../../contexts/HabitsContext";
 
 interface HabitListItemProps {
   habit: HabitWithStats;
@@ -59,15 +60,17 @@ export default function HabitListItem({
     }
   };
 
+  const { theme } = useAppTheme();
+
   return (
-    <View className="bg-surface rounded-xl p-4 mb-4 last:mb-0">
+    <View className="rounded-xl p-4 mb-4" style={{ backgroundColor: theme.surface }}>
       <View className="flex-row justify-between items-center">
         <View className="flex-1">
-          <Text className="text-lg font-medium text-gray-800 mb-1">
+          <Text className="text-lg font-medium mb-1" style={{ color: theme.text.primary }}>
             {habit.name}
           </Text>
           {showStreak && (
-            <Text className="text-secondary">
+            <Text style={{ color: theme.text.secondary }}>
               Current streak: {habit.currentStreak} days
             </Text>
           )}
@@ -75,7 +78,7 @@ export default function HabitListItem({
         <View className="flex-row items-center">
           <Link href={`/habits/${habit.id}`} asChild>
             <TouchableOpacity
-              className="p-2 rounded-full mr-2"
+              className="p-2 mr-2 rounded-full"
               style={{ backgroundColor: habit.color + "20" }}
             >
               <Ionicons name="create-outline" size={20} color={habit.color} />
@@ -101,7 +104,7 @@ export default function HabitListItem({
           style={{ backgroundColor: habit.color + "20" }}
           onPress={onToggle}
         >
-          <Text style={{ color: habit.color }}>
+          <Text className="text-center font-medium" style={{ color: habit.color }}>
             Mark as{" "}
             {habit.streaks[new Date().toISOString().split("T")[0]]
               ? "incomplete"
